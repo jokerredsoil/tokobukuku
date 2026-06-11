@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 if(!isset($_SESSION['login']) || !$_SESSION['login']){
     header("location:index.php");
