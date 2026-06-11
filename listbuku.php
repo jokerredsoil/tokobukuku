@@ -21,6 +21,7 @@
 
 
     </div>
+    <!-- UI search -->
     <nav class="navbar bg-body-tertiary">
         <div class="container-fluid">
             <form class="d-flex" role="search" action="<?= $_SERVER['PHP_SELF'] ?>" method="post">
@@ -29,9 +30,10 @@
             </form>
         </div>
     </nav>
-
+<!-- UI search end -->
     <div class="row">
         <?php
+        // logic search
         if (!isset($_POST['search']) || empty($_POST['search'])) {
             // Query ambil data buku digabung dengan nama kategorinya
             $query = "SELECT buku.*, kategori_buku.nama AS nama_kategori 
@@ -45,7 +47,7 @@
                   LEFT JOIN kategori_buku ON buku.id_kategori_buku = kategori_buku.id 
                   WHERE buku.judul_buku LIKE '%" . $_POST['search'] . "%' ORDER BY buku.id DESC";
         }
-
+            // logic search end
         $data = mysqli_query($connection, $query);
 
         if (mysqli_num_rows($data) > 0) {
