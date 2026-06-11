@@ -79,7 +79,7 @@ $id_user = isset($_SESSION['id']) ? $_SESSION['id'] : 0;
     <div class="d-flex justify-content-between mt-4">
         <a href="listbuku.php" class="btn btn-outline-secondary">Kembali Belanja</a>
         <?php if (mysqli_num_rows($data) > 0) : ?>
-            <a href="checkout_aksi.php" class="btn btn-success fw-semibold">Proses Checkout (Buat Pesanan)</a>
+            <a href="checkout_aksi.php" class="btn btn-success fw-semibold">Checkout (Buat Pesanan)</a>
         <?php endif; ?>
     </div>
 </div>

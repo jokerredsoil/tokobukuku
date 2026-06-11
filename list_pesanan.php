@@ -30,8 +30,8 @@ require 'template/header.php';
             <?php
                 $x = 1;
                 $id_user = isset($_SESSION['id']) ? $_SESSION['id'] : 0;
-                // Jika role-nya User, dia hanya bisa melihat pesanannya sendiri
-                $id_user = $_SESSION['id'];
+                
+                // Filter query berdasarkan role
                 if ($_SESSION['role'] == 'User') {
                     $query = "SELECT pesanan.*, user.nama AS nama_pembeli, 
                                      SUM(detail_pesanan.jumlah) AS total_item,
@@ -43,7 +43,6 @@ require 'template/header.php';
                               GROUP BY pesanan.id
                               ORDER BY pesanan.tanggal DESC";
                 } else {
-                    // Jika Admin, bisa melihat semua pesanan yang masuk
                     $query = "SELECT pesanan.*, user.nama AS nama_pembeli, 
                                      SUM(detail_pesanan.jumlah) AS total_item,
                                      SUM(detail_pesanan.jumlah * detail_pesanan.harga_satuan) AS total_bayar
@@ -58,6 +57,7 @@ require 'template/header.php';
                 
                 if (mysqli_num_rows($data) > 0) {
                     while($data_row = mysqli_fetch_assoc($data)){
+                        $id_pesanan = $data_row['id'];
                         $status = $data_row['status'];
                         $badge_color = 'bg-warning text-dark'; 
                         
@@ -69,7 +69,7 @@ require 'template/header.php';
                         ?>
                             <tr>
                                 <th scope="row"><?=$x?></th>
-                                <td><strong>#PSN-<?=$data_row['id']?></strong></td>
+                                <td><strong>#PSN-<?=$id_pesanan?></strong></td>
                                 <td><?=$data_row['nama_pembeli']?></td>
                                 <td><?=date('d M Y H:i', strtotime($data_row['tanggal']))?></td>
                                 <td><?=$data_row['total_item'] ?? 0?> Buku</td>
@@ -78,13 +78,56 @@ require 'template/header.php';
                                     <span class="badge <?=$badge_color?>"><?=$status?></span>
                                 </td>
                                 <td>
-                                    <a href="pesanan_detail.php?id=<?=$data_row['id']?>" class="btn btn-sm btn-primary">Detail</a>
+                                    <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#detail-<?=$id_pesanan?>">
+                                        Detail
+                                    </button>
                                     
                                     <?php if ($_SESSION['role'] == 'Admin') : ?>
-                                        <a href="pesanan_update.php?id=<?=$data_row['id']?>" class="btn btn-sm btn-warning text-white">Edit</a>
+                                        <a href="pesanan_update.php?id=<?=$id_pesanan?>" class="btn btn-sm btn-warning text-white">Edit</a>
                                     <?php endif; ?>
                                     
-                                    <a href="pesanan_delete.php?id=<?=$data_row['id']?>" class="btn btn-sm btn-danger" onclick="return confirm('Hapus data pesanan ini?')">Hapus</a>
+                                    <a href="pesanan_delete.php?id=<?=$id_pesanan?>" class="btn btn-sm btn-danger" onclick="return confirm('Hapus data pesanan ini?')">Hapus</a>
+                                </td>
+                            </tr>
+
+                            <tr class="collapse bg-light" id="detail-<?=$id_pesanan?>">
+                                <td colspan="8" class="p-3">
+                                    <div class="card card-body border-0 shadow-sm">
+                                        <h6 class="fw-bold text-secondary mb-2">Rincian Item Buku (#PSN-<?=$id_pesanan?>):</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered m-0 bg-white">
+                                                <thead class="table-dark small">
+                                                    <tr>
+                                                        <th>Judul Buku</th>
+                                                        <th>Harga Satuan</th>
+                                                        <th class="text-center">Jumlah</th>
+                                                        <th>Subtotal</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="small">
+                                                    <?php
+                                                    // Query ambil item buku di dalam pesanan ini
+                                                    $detail_query = mysqli_query($connection, "SELECT detail_pesanan.*, buku.judul_buku 
+                                                                                               FROM detail_pesanan 
+                                                                                               JOIN buku ON detail_pesanan.id_buku = buku.id 
+                                                                                               WHERE detail_pesanan.id_pesanan = $id_pesanan");
+                                                    
+                                                    while ($detail_row = mysqli_fetch_assoc($detail_query)) {
+                                                        $subtotal_item = $detail_row['harga_satuan'] * $detail_row['jumlah'];
+                                                        ?>
+                                                        <tr>
+                                                            <td><?=$detail_row['judul_buku']?></td>
+                                                            <td>Rp <?=number_format($detail_row['harga_satuan'], 0, ',', '.')?></td>
+                                                            <td class="text-center"><?=$detail_row['jumlah']?></td>
+                                                            <td class="fw-semibold text-primary">Rp <?=number_format($subtotal_item, 0, ',', '.')?></td>
+                                                        </tr>
+                                                        <?php
+                                                    }
+                                                    ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         <?php
