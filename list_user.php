@@ -4,8 +4,9 @@
     <table class="table">
         <thead>
             <tr>
-                <th scope="col">#</th>
+                <th scope="col">No</th>
                 <th scope="col">Nama</th>
+                <th scope="col">Username</th>
                 <th scope="col">Alamat</th>
                 <th scope="col">Email</th>
                 <th scope="col">No Telepon</th>
@@ -23,6 +24,7 @@
                         <tr>
                             <th scope="row"><?=$x?></th>
                             <td><?=$data_row['nama']?></td>
+                            <td><?= $data_row['username'] ?> </td>
                             <td><?=$data_row['alamat']?></td>
                             <td><?=$data_row['email']?></td>
                             <td><?=$data_row['no_telp']?></td>
